@@ -1,184 +1,294 @@
-typedef struct node
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+int ListSize (NODE *p_head)
 {
-	int data;
-	struct node *next;
-	struct node *prev;
-} NODE;
+	int count = 0;
+	NODE *p_node = p_head;
 
-static struct node* head = NULL; 
-static struct node* tail = NULL; 
+	for (count = 0; p_node != NULL; p_node = p_node->next)
+		count ++;
+	return count;
+}
 
-static int element;
-
-
-struct node* CreateNode(int element) 
-{ 
-    struct node* new_node = (struct node*)malloc(sizeof(struct node)); 
-    new_node->element = element; 
-    new_node->next = NULL; 
-    new_node->prev = NULL; 
-    return new_node; 
-} 
-
-
-void DisplayNode (NODE *)
+// Creates a node; allocates memory, gets the data value, etc
+NODE *CreateNode ()
 {
-	struct node* new_node = (struct node*)malloc(sizeof(struct node)); 
-	int index;
-	printf("Enter the index of the element you want to view : ");
-	scanf("%d",&index);
-	if(head == NULL)
+ 	NODE *p_node;
+	if ((p_node = (NODE *) malloc (sizeof (NODE))) == NULL)
 	{
-		printf("The list is empty");
+		printf ("Unable to create node: memory not available\n");
+		exit (0);		
 	}
+	p_node -> next = NULL;
+	printf ("Key in the value:");
+	scanf ("%d", &p_node->data);
+	return p_node;
+}
+
+void ModifyList (NODE *p_head)
+{
+	int pos, val;
+	NODE *p_temp = p_head, *p_prev;
+
+	printf ("Number of the node you want to modify:");
+	scanf ("%d", &pos);
+	printf ("The new value:");
+	scanf ("%d", &val);
+
+	for (int i = 0; i < (pos - 1); i ++)
+		p_temp = p_temp -> next;
+	p_temp->data = val;
+}
+
+
+void CreateList (NODE **pp_head)
+{
+	int num, val;
+	NODE *p_node, *p_temp, *p_head;
+
+	p_head = *pp_head;
+	printf ("How many nodes do you want to create?:");
+	scanf ("%d", &num);
+
+	for (int i = 0; i < num; i ++)
+	{
+		p_node = CreateNode ();
+		
+		if (p_head == NULL)
+			p_head = p_node;
+		else
+		{
+			for (p_temp = p_head; p_temp -> next != NULL; 
+				p_temp = p_temp -> next)
+				;
+			p_temp -> next = p_node;
+		}
+	}
+	*pp_head = p_head;	
+}
+
+
+void PrintList (NODE *p_head)
+{
+	NODE *p_node;
+
+	for (p_node = p_head; p_node != NULL; p_node = p_node->next)
+		printf ("Val is %d\n", p_node->data);
+}
+
+
+void InsertAtBeginning (NODE **pp_head)
+{
+	NODE *p_node;
+	NODE *p_head = *pp_head;
+
+	p_node = CreateNode ();
+	p_node -> next = p_head;
+	p_head = p_node;
+	*pp_head = p_head;
+}
+
+void InsertAtEnd (NODE **pp_head)
+{
+	NODE *p_head = *pp_head;
+	NODE *p_node, *p_temp;
+
+	p_node = CreateNode ();
+	
+	for (p_temp = p_head; p_temp->next != NULL; p_temp = p_temp->next)
+		;
+	p_temp->next = p_node;
+}
+
+void InsertAnywhere (NODE **pp_head)
+{
+	int pos;
+	int listLen;
+	NODE *p_temp = *pp_head, *p_prev, *p_node;
+
+	listLen = ListSize (p_temp);
+	printf ("Position at which to insert:");
+	scanf ("%d", &pos);
+
+	if (pos == 1)
+		InsertAtBeginning (pp_head);
+	else if (pos == listLen)
+		InsertAtEnd (pp_head);
 	else
 	{
-		for(int i=0;i<=index;i++)
+		for (int i = 0; p_temp != NULL; p_prev = p_temp, p_temp = p_temp->next, i++)
 		{
-			new_node = new_node->next;
-			if(i == index)
+			if (i == (pos - 1))
 			{
-				printf("%d",new_node->element);
+				p_node = CreateNode ();
+				p_prev -> next = p_node;
+				p_node -> next = p_temp;
+				break;
 			}
 		}
-	}
+	}	
 }
 
 
-void CreateList ()
+bool SearchList (NODE *p_head)
 {
-	int n;
-	int element;
-	printf("Enter the number of elements in the list : ");
-	scanf("%d",&n);
-	for(int i=0;i<n;i++)
+	NODE *p_temp;
+	int value;
+	bool found = false;
+	NODE *phead = p_head;
+
+	printf ("What are you looking for?:");
+	scanf ("%d", &value);
+	for (p_temp = phead; p_temp != NULL; p_temp = p_temp->next)
 	{
-		scanf("Enter the element : ");
-		scanf("%d",&element);
-		struct node *p = CreateNode(element);
-		if(head==NULL)
+		if (p_temp->data == value)
 		{
-			head=p;
-			tail=p;	
+			found = true;
+			break;
 		}
-
 	}
+	return found; 
 }
 
-void InsertAtBeginning ()
+void DeleteFirstNode (NODE **pp_head)
 {
-    struct node* new_node = CreateNode(element); 
-    if (head == NULL) { 
-        head = new_node; 
-        tail = new_node; 
-    } 
-    else { 
-        new_node->next = head; 
-        head->prev = new_node; 
-        head = new_node; 
-    } 
-}
+	NODE *p_temp;
+	NODE *p_head = *pp_head;
 
-void InsertAtEnd ()
-{
-	struct node* new_node = CreateNode(element);
-	if(tail == NULL)
+	if (p_head != NULL)
 	{
-		head = new_node;
-		tail = new_node;
-	}
-	else{
-		new_node->next = tail;
-		tail->prev = new_node;
-		tail = new_node;
-	}
-}
-
-void InsertAnywhere ()
-{
-	int n;
-	int element;
-	printf()
-
-}
-
-void DeleteFirstNode ()
-{
-	struct node* new_node = CreateNode(element);	
-	if(head == NULL)
-	{
-		printf("The list is empty");
+		p_temp = p_head;
+		p_head = p_head -> next;
+		free (p_temp);
 	}
 	else
-	{
-		new_node = head;
-		head = head->next;
-		head->prev = NULL;
-		free(new_node);
-	}
+		printf ("There is nothing to delete\n");
+	*pp_head = p_head;
 }
 
-void DeleteLastNode ()
+void DeleteLastNode(NODE **pp_head)
 {
-	struct node* new_node = CreateNode(element);
-	if(head == NULL)
+	NODE *p_head = *pp_head;
+	NODE *second_last;
+	if (p_head != NULL)
 	{
-		printf("The list is empty");
-	}
-	else
-	{
-		new_node = tail;
-		tail = tail->next;
-		tail->prev = new_node;
-		free(new_node);
-	}
-}
-
-void DeleteAnyNode ()
-{
-	struct node* new_node = CreateNode(element);
-	Node *new_node_temp;
-	int index;
-	printf("Enter the index of the node you want to delete : ");
-	scanf("%d",&index);
-	if(head == NULL)
-	{
-		printf("The list is empty");
-	}
-	else
-	{
-		for(int i=0;i<index;i++)
+		// If the list has only one node, delete it.
+		if (p_head->next == NULL)
+		{ 
+			free(p_head);
+			p_head = NULL;
+		}
+		else
 		{
-			new_node_temp = new_node;
-			new_node->next = new_node;
+			// Find the second last node
+			second_last = p_head;
+    			while (second_last->next->next != NULL)
+        			second_last = second_last->next;
+    			// Delete the last node
+    			free(second_last->next);
+
+    			// Change next of second last
+    			second_last->next = NULL;
 		}
-		new_node_temp->next = new_node;
-		new_node->prev = new_node_temp;
-		free(new_node_temp);
 	}
+	else
+		printf ("There is nothing to delete\n");
+	*pp_head = p_head;
 }
 
-void NavigateList ()
+void DeleteAnyNode (NODE **pp_head)
 {
-	 struct node* new_node = (struct node*)malloc(sizeof(struct node)); 
-	 char choice;
-	 printf("Enter the position to navigate to : N(Next Node),P(Previous Node),F(First Node),L(Last Node\n");
-	 scanf("%c",&choice);
+	int nodeNum, i;
+	NODE *p_head = *pp_head;
+	int lsize = ListSize (p_head);
+	NODE *p_cur, *p_prev;
 
+	printf ("Enter the number of the node you want to delete:");
+	scanf ("%d", &nodeNum);
 
+	if (nodeNum < 0 || nodeNum > lsize)
+	{
+		printf ("Invalid node number\n");
+		exit (0);
+	}
+
+	if (nodeNum == 1)	// Delete first node
+	{
+		DeleteFirstNode (pp_head);
+		return;
+	}
+
+	if (nodeNum == lsize)	// Last node to be deleted
+	{
+		DeleteLastNode (pp_head);
+		return;
+	}
+
+	p_cur = p_head;
+	for (i = 0; i < (nodeNum - 1); i ++, p_prev = p_cur, p_cur = p_cur -> next)
+		;
+	p_prev -> next = p_cur -> next;
+	free (p_cur);
 }
 
-void ModifyList ()
+
+
+bool IsListEmpty (NODE *p_head)
 {
-	 struct node* new_node = (struct node*)malloc(sizeof(struct node)); 
-	 int index;
-	 printf("Enter the index where you want to replace the character : ");
-	 scanf("%d",&index);
-	 
+	bool ret_val;
 
+	ret_val = p_head == NULL ? true: false;
+	return ret_val;
 }
-bool SearchList ();
-void PrintList ();
-void ReversePrint ();
-bool IsListEmpty ();
-void FreeList ();
+
+
+/*
+Follow these steps below to solve the problem:
+
+Initialize three pointers prev as NULL, curr as head, and next as NULL.
+Iterate through the linked list. In a loop, do the following:
+Store the next node, next = curr -> next
+Update the next pointer of curr to prev, curr -> next = prev
+Update prev as curr and curr as next, prev = curr and curr = next
+*/
+
+// Given the head of a list, reverse the list and return the
+// head of the reversed list
+void ReverseList(NODE **pp_head) 
+{
+    	// Initialize three pointers: curr, prev and next
+    	NODE *curr = *pp_head, *prev = NULL, *next;
+
+    	// Traverse all the nodes of Linked List
+    	while (curr != NULL) 
+	{
+        	// Store next
+        	next = curr->next;
+
+        	// Reverse current node's next pointer
+        	curr->next = prev;
+
+        	// Move pointers one position ahead
+        	prev = curr;
+        	curr = next;
+    	}
+
+    	// Update the head to point to the reversed list
+	*pp_head = prev;
+}
+
+// Free the memory taken up by the whole list
+void FreeList(NODE **pp_head)
+{
+    	NODE *current = *pp_head;
+    	NODE *nextNode;
+    	while (current != NULL)
+    	{
+		nextNode = current->next;
+        	free(current);
+        	current = nextNode;
+    	}
+    	*pp_head=NULL;
+}
