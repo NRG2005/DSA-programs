@@ -1,50 +1,113 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "ExpTree.h"
 
-typedef struct node{
-	char data;
-	struct node* left;
-	struct node* right;
-}NODE;
+static int top = -1;
+NODE **eStack;
 
-NODE *CreateLeftNode(char[])
+NODE *CreateNode (char iData)
 {
-	NODE *p_node;
-	p_node = (NODE *) malloc (sizeof (NODE));
-	if(p_node == NULL)
+	NODE *pNode;
+
+	if ((pNode = (NODE *) malloc (sizeof (NODE))) == NULL)
 	{
-		printf("Data could not be allocated");
-		exit();
+		printf ("Memory allocation failure\n");
+		exit (1);
 	}
-	NODE->data = data;
-	NODE->left = NULL;
-	return NODE;
+	pNode -> left = NULL;
+	pNode -> right = NULL;
+	pNode -> data = iData;
+	return pNode;
 }
 
-NODE *CreateRightNode(char [])
+
+int CheckChar (char inChar)
 {
-	NODE *p_node;
-	p_node = (NODE *) malloc (sizeof (NODE));
-	if(p_node == NULL)
+	int retVal = -1;
+
+   	if (inChar == '+' || inChar == '-' || inChar == '*' 
+				|| inChar == '/')
+		retVal = 1;	// indicates an operator
+   	else 
 	{
-		printf("Data could not be allocated");
-		exit();
+		inChar = toupper (inChar);
+		if (inChar >= 'A' || inChar <= 'Z')
+      			retVal = 2;
 	}
-	NODE->data = data;
-	NODE->right = NULL;
-	return NODE;
+   	return (retVal);
 }
 
-void push(NODE *char[])
+void push(NODE *tree) 
 {
-	if(NODE *char[] == NULL)
-	{
-		printf("The node is empty\n");
-		exit();
-	}
-	if(NODE *char[].isalpha() == 1)
-	{
-		
-	}
+   	top++;
+   	eStack [top] = tree;
+}
+NODE *pop() 
+{
+   	top--;
+   	return (eStack[top + 1]);
+}
 
+void construct_expression_tree(char *suffix, NODE *pStack []) 
+{
+   	char s;
+   	NODE *newl, *p1, *p2;
+   	int cType;
+	eStack = pStack;
+   	s = suffix[0];
+   	for (int i = 1; s != 0; i++) 
+	{
+      		cType = CheckChar (s);
+      		if (cType == 2) 	// Operand
+		{
+         		newl = CreateNode (s);
+         		push(newl);
+      		} 
+		else if (cType == 1)	// Operator
+		{
+         		p1 = pop();
+         		p2 = pop();
+			newl = CreateNode (s);
+         		newl->left = p2;
+         		newl->right = p1;
+         		push(newl);
+      		}
+		else
+		{
+			printf ("Invalid character\n");
+			exit (0);
+		}
+      		s = suffix[i];
+   	}
+}
+
+void preOrder(NODE *tree) 
+{
+   	if (tree != NULL) 
+	{
+		printf ("%c ", tree->data);
+       		preOrder(tree->left);
+      		preOrder(tree->right);
+   	}
+}
+
+void inOrder(NODE *tree) 
+{
+   	if (tree != NULL) 
+	{
+      		inOrder(tree->left);
+      		printf ("%c ", tree->data);
+      		inOrder(tree->right);
+   	}
+}
+
+void postOrder(NODE *tree) 
+{
+   	if (tree != NULL) 
+	{
+      		postOrder(tree->left);
+      		postOrder(tree->right);
+      		printf ("%c ", tree->data);
+   	}
 }
